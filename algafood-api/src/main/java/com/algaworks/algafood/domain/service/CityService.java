@@ -1,7 +1,9 @@
 package com.algaworks.algafood.domain.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -24,18 +26,30 @@ public class CityService {
 	private StateRepository stateRepository;
 	
 	public List<City> list() {
-		return cityRepository.list();
+		return cityRepository.findAll();
 	}
 	
 	public City getById(Long id) {
-		return cityRepository.getById(id);
+		Optional<City> city = cityRepository.findById(id);
+		
+		if (city.isPresent()) return city.get();
+		
+		return null;
+	}
+	
+	public City update(Long cityId, City city) {
+		Optional<City> currentCity = cityRepository.findById(cityId);
+		
+		if (!currentCity.isPresent()) throw new EntityNotFoundException(String.format("There is no city for id %d", cityId));
+		
+		BeanUtils.copyProperties(city, currentCity.get(), "id");
+		
+		return cityRepository.save(currentCity.get());
 	}
 	
 	public City save(City city) {
 		Long stateId = city.getState().getId();
-		State state = stateRepository.getById(stateId);
-		
-		if (state == null) throw new EntityNotFoundException(String.format("There is no state for id %d", stateId));
+		State state = stateRepository.findById(stateId).orElseThrow(() -> new EntityNotFoundException(String.format("There is no state for id %d", stateId)));
 		
 		city.setState(state);
 		
@@ -44,7 +58,7 @@ public class CityService {
 	
 	public void remove(Long cityId) {
 		try {
-			cityRepository.remove(cityId);
+			cityRepository.deleteById(cityId);
 		} catch (EmptyResultDataAccessException e) {
 			throw new EntityNotFoundException(String.format("There is no city for id %d", cityId));
 		} catch (DataIntegrityViolationException e) {

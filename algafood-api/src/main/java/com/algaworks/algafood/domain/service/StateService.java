@@ -1,7 +1,9 @@
 package com.algaworks.algafood.domain.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -19,11 +21,25 @@ public class StateService {
 	private StateRepository stateRepository;
 	
 	public List<State> list() {
-		return stateRepository.list();
+		return stateRepository.findAll();
 	}
 	
 	public State getById(Long id) {
-		return stateRepository.getById(id);
+		Optional<State> state = stateRepository.findById(id);
+	
+		if (state.isPresent()) return state.get();
+		
+		return null;
+	}
+	
+	public State update(Long stateId, State state) {
+		Optional<State> currentState = stateRepository.findById(stateId);
+		
+		if (!currentState.isPresent()) throw new EntityNotFoundException(String.format("There is no state for id %d", stateId));
+		
+		BeanUtils.copyProperties(state, currentState.get(), "id");
+		
+		return stateRepository.save(currentState.get());
 	}
 	
 	public State save(State state) {
@@ -32,7 +48,7 @@ public class StateService {
 	
 	public void remove(Long stateId) {
 		try {
-			stateRepository.remove(stateId);
+			stateRepository.deleteById(stateId);
 		} catch (EmptyResultDataAccessException e) {
 			throw new EntityNotFoundException(String.format("There is no state for id %d", stateId));
 		} catch (DataIntegrityViolationException e) {

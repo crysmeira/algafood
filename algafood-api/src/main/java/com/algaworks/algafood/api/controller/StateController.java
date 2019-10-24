@@ -2,7 +2,6 @@ package com.algaworks.algafood.api.controller;
 
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,23 +47,18 @@ public class StateController {
 			
 			return ResponseEntity.status(HttpStatus.CREATED).body(state);
 		} catch (EntityNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.notFound().build();
 		}
 	}
 	
 	@PutMapping("/{stateId}")
 	public ResponseEntity<?> update(@PathVariable Long stateId, @RequestBody State state) {
 		try {
-			State currentState = stateService.getById(stateId);
+			state = stateService.update(stateId, state);
 			
-			if (currentState == null) return ResponseEntity.notFound().build();
-			
-			BeanUtils.copyProperties(state, currentState, "id");
-			
-			currentState = stateService.save(currentState);
-			return ResponseEntity.ok(currentState);
+			return ResponseEntity.ok(state);
 		} catch (EntityNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.notFound().build();
 		}
 	}
 	

@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,23 +52,18 @@ public class RestaurantController {
 			
 			return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
 		} catch (EntityNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.notFound().build();
 		}
 	}
 	
 	@PutMapping("/{restaurantId}")
 	public ResponseEntity<?> update(@PathVariable Long restaurantId, @RequestBody Restaurant restaurant) {
 		try {
-			Restaurant currentRestaurant = restaurantService.getById(restaurantId);
+			restaurant = restaurantService.update(restaurantId, restaurant);
 			
-			if (currentRestaurant == null) return ResponseEntity.notFound().build();
-			
-			BeanUtils.copyProperties(restaurant, currentRestaurant, "id");
-			
-			currentRestaurant = restaurantService.save(currentRestaurant);
-			return ResponseEntity.ok(currentRestaurant);
+			return ResponseEntity.ok(restaurant);
 		} catch (EntityNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			return ResponseEntity.notFound().build();
 		}
 	}
 	

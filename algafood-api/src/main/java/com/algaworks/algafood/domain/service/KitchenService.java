@@ -1,7 +1,9 @@
 package com.algaworks.algafood.domain.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -19,11 +21,27 @@ public class KitchenService {
 	private KitchenRepository kitchenRepository;
 	
 	public List<Kitchen> list() {
-		return kitchenRepository.list();
+		return kitchenRepository.findAll();
 	}
 	
 	public Kitchen getById(Long id) {
-		return kitchenRepository.getById(id);
+		Optional<Kitchen> kitchen =  kitchenRepository.findById(id);
+		
+		if (kitchen.isPresent()) {
+			return kitchen.get();
+		}
+		
+		return null;
+	}
+	
+	public Kitchen update(Long kitchenId, Kitchen kitchen) {
+		Optional<Kitchen> currentKitchen = kitchenRepository.findById(kitchenId);
+		
+		if (!currentKitchen.isPresent()) throw new EntityNotFoundException(String.format("There is no kitchen for id %d", kitchenId));
+		
+		BeanUtils.copyProperties(kitchen, currentKitchen.get(), "id");
+		
+		return kitchenRepository.save(currentKitchen.get());
 	}
 	
 	public Kitchen save(Kitchen kitchen) {
@@ -32,7 +50,7 @@ public class KitchenService {
 	
 	public void remove(Long kitchenId) {
 		try {
-			kitchenRepository.remove(kitchenId);
+			kitchenRepository.deleteById(kitchenId);
 		} catch (EmptyResultDataAccessException e) {
 			throw new EntityNotFoundException(String.format("There is no kitchen for id %d", kitchenId));
 		} catch (DataIntegrityViolationException e) {
