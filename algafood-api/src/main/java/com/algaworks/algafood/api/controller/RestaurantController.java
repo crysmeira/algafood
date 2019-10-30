@@ -90,7 +90,7 @@ public class RestaurantController {
 		
 		return update(restaurantId, currentRestaurant);
 	}
-
+	
 	private void merge(Map<String, Object> sourceData, Restaurant targetRestaurant) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Restaurant sourceRestaurant = objectMapper.convertValue(sourceData, Restaurant.class);
