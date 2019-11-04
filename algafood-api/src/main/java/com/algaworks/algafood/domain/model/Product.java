@@ -1,35 +1,41 @@
 package com.algaworks.algafood.domain.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-//@JsonRootName("kitchen")
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-public class Kitchen {
+public class Product {
 
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(nullable = false)
+	@Column
 	private String name;
 	
-	@OneToMany(mappedBy = "kitchen")
-	@JsonIgnore
-	private List<Restaurant> restaurants = new ArrayList<>();
+	@Column
+	private String description;
+	
+	@Column
+	private BigDecimal price;
+	
+	@Column
+	private Boolean active;
+	
+	@ManyToOne
+	@JoinColumn(name = "restaurant_id", nullable = false)
+	private Restaurant restaurant;
 }

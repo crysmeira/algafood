@@ -42,7 +42,7 @@ public class RestaurantService {
 		
 		if (!currentRestaurant.isPresent()) throw new EntityNotFoundException(String.format("There is no restaurant for id %d", restaurantId));
 		
-		BeanUtils.copyProperties(restaurant, currentRestaurant.get(), "id");
+		BeanUtils.copyProperties(restaurant, currentRestaurant.get(), "id", "paymentTypes", "address", "dateRegister");
 		
 		return restaurantRepository.save(currentRestaurant.get());
 	}
