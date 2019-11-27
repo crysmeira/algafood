@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.algaworks.algafood.domain.exception.EntityInUseException;
-import com.algaworks.algafood.domain.exception.EntityNotFoundException;
 import com.algaworks.algafood.domain.model.Restaurant;
 import com.algaworks.algafood.domain.service.RestaurantService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,54 +35,30 @@ public class RestaurantController {
 	}
 	
 	@GetMapping("/{restaurantId}")
-	public ResponseEntity<Restaurant> getById(@PathVariable Long restaurantId) {
-		Restaurant restaurant = restaurantService.getById(restaurantId);
-		
-		if (restaurant != null) return ResponseEntity.ok(restaurant);
-		
-		return ResponseEntity.notFound().build();
+	public Restaurant getById(@PathVariable Long restaurantId) {
+		return restaurantService.getById(restaurantId);
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> save(@RequestBody Restaurant restaurant) {
-		try {
-			restaurant = restaurantService.save(restaurant);
-			
-			return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
-		} catch (EntityNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+	@ResponseStatus(HttpStatus.CREATED)
+	public Restaurant save(@RequestBody Restaurant restaurant) {
+		return restaurantService.save(restaurant);
 	}
 	
 	@PutMapping("/{restaurantId}")
-	public ResponseEntity<?> update(@PathVariable Long restaurantId, @RequestBody Restaurant restaurant) {
-		try {
-			restaurant = restaurantService.update(restaurantId, restaurant);
-			
-			return ResponseEntity.ok(restaurant);
-		} catch (EntityNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		}
+	public Restaurant update(@PathVariable Long restaurantId, @RequestBody Restaurant restaurant) {
+		return restaurantService.update(restaurantId, restaurant);
 	}
 	
 	@DeleteMapping("/{restaurantId}")
-	public ResponseEntity<Restaurant> remove(@PathVariable Long restaurantId) {
-		try {
-			restaurantService.remove(restaurantId);	
-			
-			return ResponseEntity.noContent().build();
-		} catch (EntityNotFoundException e) {
-			return ResponseEntity.notFound().build();
-		} catch (EntityInUseException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-		}
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remove(@PathVariable Long restaurantId) {
+		restaurantService.remove(restaurantId);	
 	}
 	
 	@PatchMapping("/{restaurantId}")
-	public ResponseEntity<?> partialUpdate(@PathVariable Long restaurantId, @RequestBody Map<String, Object> fields) {
+	public Restaurant partialUpdate(@PathVariable Long restaurantId, @RequestBody Map<String, Object> fields) {
 		Restaurant currentRestaurant = restaurantService.getById(restaurantId);
-		
-		if (currentRestaurant == null) return ResponseEntity.notFound().build();
 		
 		merge(fields, currentRestaurant);
 		

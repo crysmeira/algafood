@@ -23,7 +23,7 @@ public class RestaurantService {
 	private RestaurantRepository restaurantRepository;
 	
 	@Autowired
-	private KitchenRepository kitchenRepository;
+	private KitchenService kitchenService;
 	
 	public List<Restaurant> list() {
 		return restaurantRepository.findAll();
@@ -34,7 +34,7 @@ public class RestaurantService {
 	
 		if (restaurant.isPresent()) return restaurant.get();
 		
-		return null;
+		throw new EntityNotFoundException(String.format("There is no restaurant for id %d", id));
 	}
 	
 	public Restaurant update(Long restaurantId, Restaurant restaurant) {
@@ -49,7 +49,7 @@ public class RestaurantService {
 	
 	public Restaurant save(Restaurant restaurant) {
 		Long kitchenId = restaurant.getKitchen().getId();
-		Kitchen kitchen = kitchenRepository.findById(kitchenId).orElseThrow(() -> new EntityNotFoundException(String.format("There is no kitchen for id %d", kitchenId)));
+		Kitchen kitchen = kitchenService.getById(kitchenId);
 		
 		restaurant.setKitchen(kitchen);
 		

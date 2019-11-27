@@ -31,7 +31,7 @@ public class KitchenService {
 			return kitchen.get();
 		}
 		
-		return null;
+		throw new EntityNotFoundException(String.format("There is no kitchen for id %d", id));
 	}
 	
 	public Kitchen update(Long kitchenId, Kitchen kitchen) {

@@ -29,7 +29,7 @@ public class StateService {
 	
 		if (state.isPresent()) return state.get();
 		
-		return null;
+		throw new EntityNotFoundException(String.format("There is no state for id %d", id));
 	}
 	
 	public State update(Long stateId, State state) {

@@ -23,7 +23,7 @@ public class CityService {
 	private CityRepository cityRepository;
 	
 	@Autowired
-	private StateRepository stateRepository;
+	private StateService stateService;
 	
 	public List<City> list() {
 		return cityRepository.findAll();
@@ -34,7 +34,7 @@ public class CityService {
 		
 		if (city.isPresent()) return city.get();
 		
-		return null;
+		throw new EntityNotFoundException(String.format("There is no city for id %d", id));
 	}
 	
 	public City update(Long cityId, City city) {
@@ -49,7 +49,7 @@ public class CityService {
 	
 	public City save(City city) {
 		Long stateId = city.getState().getId();
-		State state = stateRepository.findById(stateId).orElseThrow(() -> new EntityNotFoundException(String.format("There is no state for id %d", stateId)));
+		State state = stateService.getById(stateId);
 		
 		city.setState(state);
 		
